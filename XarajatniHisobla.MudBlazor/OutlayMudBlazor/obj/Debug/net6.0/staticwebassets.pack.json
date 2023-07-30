@@ -1,0 +1,53 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\acer\\Desktop\\OutlayMudBlazor - Last - Copy (4)\\OutlayMudBlazor\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazor.webassembly.js",
+      "PackagePath": "staticwebassets\\_framework\\blazor.webassembly.js"
+    },
+    {
+      "Id": "C:\\Users\\acer\\Desktop\\OutlayMudBlazor - Last - Copy (4)\\OutlayMudBlazor\\obj\\Debug\\net6.0\\build-gz\\B+cu1XWB.gz",
+      "PackagePath": "staticwebassets\\_framework\\blazor.webassembly.js.gz"
+    },
+    {
+      "Id": "C:\\Users\\acer\\Desktop\\OutlayMudBlazor - Last - Copy (4)\\OutlayMudBlazor\\wwwroot\\appsettings.json",
+      "PackagePath": "staticwebassets\\appsettings.json"
+    },
+    {
+      "Id": "C:\\Users\\acer\\Desktop\\OutlayMudBlazor - Last - Copy (4)\\OutlayMudBlazor\\wwwroot\\favicon.ico",
+      "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
+      "Id": "C:\\Users\\acer\\Desktop\\OutlayMudBlazor - Last - Copy (4)\\OutlayMudBlazor\\wwwroot\\img\\pic1.jpg",
+      "PackagePath": "staticwebassets\\img\\pic1.jpg"
+    },
+    {
+      "Id": "C:\\Users\\acer\\Desktop\\OutlayMudBlazor - Last - Copy (4)\\OutlayMudBlazor\\wwwroot\\img\\pic2.jpg",
+      "PackagePath": "staticwebassets\\img\\pic2.jpg"
+    },
+    {
+      "Id": "C:\\Users\\acer\\Desktop\\OutlayMudBlazor - Last - Copy (4)\\OutlayMudBlazor\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "C:\\Users\\acer\\Desktop\\OutlayMudBlazor - Last - Copy (4)\\OutlayMudBlazor\\wwwroot\\sample-data\\weather.json",
+      "PackagePath": "staticwebassets\\sample-data\\weather.json"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.OutlayMudBlazor.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.build.OutlayMudBlazor.props",
+      "PackagePath": "build\\OutlayMudBlazor.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.buildMultiTargeting.OutlayMudBlazor.props",
+      "PackagePath": "buildMultiTargeting\\OutlayMudBlazor.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.buildTransitive.OutlayMudBlazor.props",
+      "PackagePath": "buildTransitive\\OutlayMudBlazor.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

@@ -1,0 +1,299 @@
+﻿@page "/BeriladiganQarzlar"
+
+@using FluentValidation
+@using Newtonsoft.Json;
+@using OutlayMudBlazor.Dtoes;
+@inject NavigationManager NavManager
+@using System.Net.Http.Json
+@using OutlayMudBlazor.Services;
+@inject HttpClient httpClient
+@inject ISnackbar Snackbar
+@inject DebtService debtService
+@inject AccountService accountService
+
+@if (errorMessage is not null || errorMessage2 is not null)
+{
+    <div style="display: flex; justify-content: center;">
+        <MudAlert Severity="MudBlazor.Severity.Error">@(errorMessage ?? errorMessage2)</MudAlert>
+        </div>
+}
+else if (Elements?.Count() is 0)
+{
+    <div style="text-align: center;">
+        <h1>Beriladigan Qarzlar mavjud emas</h1>
+
+    </div>
+}
+else
+{
+
+    <MudTable style="background-color:floralwhite;" Items="@Elements" Dense="@dense" Bordered="@bordered" Striped="@striped" Filter="new Func<Debts,bool>(FilterFunc1)" @bind-SelectedItem="selectedItem1"
+             SortLabel="Sort By" CommitEditTooltip="Commit Edit"
+          OnCommitEditClick="@(() => Snackbar.Add("Commit Edit Handler Invoked"))" RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
+          RowEditCommit="ItemHasBeenCommitted" IsEditRowSwitchingBlocked="@blockSwitch" ApplyButtonPosition="@applyButtonPosition" EditButtonPosition="@editButtonPosition" EditTrigger="@editTrigger">
+
+
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Qarzlar</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString1" Placeholder="Qidirish" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+
+        <ColGroup>
+            <col style="width: 2%;" />
+            <col style="width: 8%;" />
+            <col style="width: 26%;" />
+            <col style="width: 24%;" />
+            <col style="width: 14%;" />
+            <col style="width: 14%;" />
+            <col style="width: 2%;" />
+        </ColGroup>
+
+        <HeaderContent>
+
+
+            <MudTh><MudTableSortLabel SortBy="new Func<Debts, object>(x=>x.Index)">Tartib raqami</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Debts, object>(x=>x.Cost)">Pul miqdori</MudTableSortLabel></MudTh>
+            <MudTh style="text-align: center;">Malumot</MudTh>
+            <MudTh>2 - shaxsning nomi</MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Debts, object>(x=>x.CreateAt)">Yaratilgan sana</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Debts, object>(x=>x.LastAt)">Qaytarish sanasi</MudTableSortLabel></MudTh>
+            <MudTh style="text-align: center;"> O'chirish</MudTh>
+
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd>@context.Index</MudTd>
+            <MudTd>@context.Cost</MudTd>
+            @if (context.Description is null)
+            {
+                <MudTd> bo'sh</MudTd>
+            }
+            else
+            {
+                <MudTd> @context.Description </MudTd>
+            }
+
+            <MudTd> @(userName.ToLower() == context.SenderName.ToLower() ? context.ReceiverName : context.SenderName)</MudTd>
+
+                <MudTd> @context.CreateAt </MudTd>
+                @if (context.LastAt is null)
+            {
+                <MudTd> bo'sh</MudTd>
+            }
+            else
+            {
+                <MudTd> @context.LastAt </MudTd>
+            }
+
+            @if (context.DeleteSenderName is null)
+            {
+                <MudTd>   <MudIconButton OnClick="@(async () => await UpdateDebtForDelete(context.Id))" Icon=@Icons.Material.Filled.Delete Color="Color.Default" /> </MudTd>
+            }
+            else
+            {
+                <MudTd>   <MudIconButton Icon=@Icons.Material.Filled.AutoDelete Color="Color.Default" /> </MudTd>
+            }
+
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager RowsPerPageString="Har bir sahifadagi qatorlar:"
+                       FirstPageLabel="Birinchi sahifa"
+                       LastPageLabel="So'nggi sahifa"
+                       ItemsPerPageLabel="Qatorlar soni: "
+                       PageLabel=" sahifa"
+                       OfLabel=" dan" />
+
+        </PagerContent>
+    </MudTable>
+
+
+}
+
+
+@code {
+    private bool dense = true;
+    private bool striped = true;
+    private bool bordered = true;
+    private string searchString1 = "";
+    private Debts selectedItem1 = null;
+    private HashSet<Debts> selectedItems = new HashSet<Debts>();
+    string userName;
+    private List<Debts>? Elements = new List<Debts>();
+    private Debts? Element = new Debts();
+    string? errorMessage;
+    string? errorMessage2;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result2 = await accountService.GetAccountAsync();
+
+        if (result2.IsSuccess)
+        {
+            var userVM = result2.Data;
+            userName = userVM?.Name;
+        }
+        else
+        {
+            errorMessage2 = result2.ErrorMessage;
+        }
+
+        var result = await debtService.GetDebtsAsync();
+
+        if (result.IsSuccess)
+        {
+            Elements = result.Data;
+            Elements = Elements.Where(x => x.DebtType == EDebtType.Accepted && x.GivenPersonName.ToLower() != userName.ToLower()).ToList();
+            var index = 0;
+            foreach (var el in Elements)
+            {
+                el.Index = ++index;
+            }
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+    }
+
+
+
+    private bool FilterFunc1(Debts element) => FilterFunc(element, searchString1);
+
+    private bool FilterFunc(Debts element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+
+        if (element.Description is not null)
+            if (element.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+
+
+        if (element.SenderName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (element.ReceiverName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
+
+
+    private async Task UpdateDebtForDelete(int debtId)
+    {
+
+        var result = await debtService.UpdateDebtForDelete(debtId);
+
+        if (result.IsSuccess)
+        {
+            NavManager.NavigateTo(NavManager.Uri, true);
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+    }
+
+
+    private void GoToUsers()
+    {
+        NavManager.NavigateTo($"/FoydalanuvchilarniKor'rsatQarzUchun");
+    }
+
+    private void GoToStatistics()
+    {
+        NavManager.NavigateTo($"/StatistikaniKo'ris");
+    }
+
+
+     private bool blockSwitch = false;
+    private List<string> editEvents = new();
+    private Debts elementBeforeEdit;
+    private TableApplyButtonPosition applyButtonPosition = TableApplyButtonPosition.End;
+    private TableEditButtonPosition editButtonPosition = TableEditButtonPosition.End;
+    private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
+
+
+
+    public enum TableApplyButtonPosition
+    {
+        Start,
+        End,
+        StartAndEnd
+    }
+
+    public enum TableEditButtonPosition
+    {
+        Start,
+        End,
+        StartAndEnd
+    }
+
+    public enum TableEditTrigger
+    {
+        RowClick,
+        EditButton
+    }
+
+
+    private void ClearEventLog()
+    {
+        editEvents.Clear();
+    }
+
+    private void AddEditionEvent(string message)
+    {
+        editEvents.Add(message);
+        StateHasChanged();
+    }
+
+    private void BackupItem(object element)
+    {
+        elementBeforeEdit = new()
+            {
+                Index = ((Debts)element).Index,
+                Description = ((Debts)element).Description,
+                Cost = ((Debts)element).Cost,
+                SenderName = ((Debts)element).SenderName,
+                GivenPersonName = ((Debts)element).GivenPersonName,
+                DeleteSenderName = ((Debts)element).DeleteSenderName,
+                DebtType = ((Debts)element).DebtType,
+                CreateAt = ((Debts)element).CreateAt,
+                LastAt = ((Debts)element).LastAt,
+            };
+        AddEditionEvent($"RowEditPreview event: made a backup of Element {((Debts)element).Index}");
+    }
+
+    private void ItemHasBeenCommitted(object element)
+    {
+        AddEditionEvent($"RowEditCommit event: Changes to Element {((Debts)element).Index} committed");
+    }
+
+    private void ResetItemToOriginalValues(object element)
+    {
+        ((Debts)element).Index = elementBeforeEdit.Index;
+        ((Debts)element).Description = elementBeforeEdit.Description;
+        ((Debts)element).Cost = elementBeforeEdit.Cost;
+        ((Debts)element).SenderName = elementBeforeEdit.SenderName;
+        ((Debts)element).GivenPersonName = elementBeforeEdit.GivenPersonName;
+        ((Debts)element).DeleteSenderName = elementBeforeEdit.DeleteSenderName;
+        ((Debts)element).DebtType = elementBeforeEdit.DebtType;
+        ((Debts)element).CreateAt = elementBeforeEdit.CreateAt;
+        ((Debts)element).LastAt = elementBeforeEdit.LastAt;
+        AddEditionEvent($"RowEditCancel event: Editing of Element {((Debts)element).Index} canceled");
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+

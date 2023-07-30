@@ -1,0 +1,134 @@
+﻿@page "/XarajatniO'zgartirish/{outlayId}"
+@using FluentValidation
+@using Newtonsoft.Json;
+@using OutlayMudBlazor.Dtoes;
+@using System.Net;
+@using OutlayMudBlazor.Services;
+@inject NavigationManager NavManager
+@inject OutlayService outlayService
+
+
+@if(IsNotFound)
+{
+    <div style="text-align: center;">
+        <h1>Bunday xarajat topilmadi</h1>
+
+    </div>
+}
+else
+{
+    <div style="display: flex; justify-content: center;">
+        <div style="width: 433px;">
+            <MudCard style="background-color:floralwhite;">
+                <MudForm Model="@model" @ref="@form" Validation="@(updateOutlayValidator.ValidateValue)" ValidationDelay="0">
+                    <MudCardContent>
+
+                        @if (errorMessage is not null)
+                        {
+                            <div style="display: flex; justify-content: center;">
+                                <MudAlert Severity="MudBlazor.Severity.Error">@errorMessage</MudAlert>
+                            </div>
+                        }
+
+                        <MudTextField @bind-Value="model.Name"
+                                  For="@(() => model.Name)"
+                                  Immediate="true"
+                                  Label="Nom" />
+
+                        <MudTextField @bind-Value="model.Description"
+                                  For="@(() => model.Description)"
+                                  Immediate="true"
+                                  Label="Qo'shimcha malumot" />
+
+                        <MudTextField @bind-Value="model.Cost"
+                                  For="@(() => model.Cost)"
+                                  Immediate="true"
+                                  Label="Narx" />
+
+                    </MudCardContent>
+                </MudForm>
+                <div style="display: flex; justify-content: center;">
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await ChangeOutlay())">Xarajatni O'zgartirish</MudButton>
+                    </MudCardActions>
+                </div>
+                <br />
+            </MudCard>
+        </div>
+    </div>
+}
+
+
+
+
+
+@code {
+    string? errorMessage;
+    MudForm? form;
+    private bool IsNotFound;
+    UpdateOutlayFluentValidator updateOutlayValidator = new UpdateOutlayFluentValidator();
+
+    UpdateOutlay model = new UpdateOutlay();
+
+    [Parameter]
+    public string? outlayId { get; set; }
+
+    private async Task ChangeOutlay()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            if (string.IsNullOrEmpty(model.Description))
+                model.Description = null;
+
+            var result = await outlayService.UpdateOutlayAsync(model,outlayId);
+
+            if (result.IsSuccess)
+            {
+                NavManager.NavigateTo($"/Xarajat/{outlayId}");
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage;
+                IsNotFound = result.IsNotFound;
+            }
+        }
+
+    }
+
+
+    public class UpdateOutlayFluentValidator : AbstractValidator<UpdateOutlay>
+    {
+        public UpdateOutlayFluentValidator()
+        {
+            RuleFor(x => x.Name)
+                 .NotEmpty().WithMessage("Nom kiriting")
+                 .Length(3, 20).WithMessage("Nom kamida 3 va ko'pi bilan 20 belgidan iborat bo'lishi kerak");
+
+            RuleFor(x => x.Description)
+                 .Cascade(CascadeMode.StopOnFirstFailure)
+                 .Must(ValidateDescription).WithMessage("Malumot kamida 3 va ko'pi bilan 20 belgidan iborat bo'lishi yoki bo'sh qoldirilishi kerak");
+
+            RuleFor(x => x.Cost)
+                .NotEmpty().WithMessage("Narxni kiriting")
+                .NotEqual(0).WithMessage("Narx 0 ga teng bo'la olmaydi");
+        }
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<UpdateOutlay>.CreateWithOptions((UpdateOutlay)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+
+        private bool ValidateDescription(string description)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+                return true;
+
+            return description.Length >= 3 && description.Length <= 20;
+        }
+    }
+}

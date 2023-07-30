@@ -1,0 +1,121 @@
+﻿@page "/ShaxsiyKategoriyaYaratish"
+
+@using FluentValidation
+@using Newtonsoft.Json;
+@using OutlayMudBlazor.Dtoes;
+@using OutlayMudBlazor.Services;
+@inject NavigationManager NavManager
+@inject CategoryService categoryService
+@inject IConfiguration configuration
+
+<div style="display: flex; justify-content: center;">
+    <div style="width: 35%;">
+        <MudCard style="background-color:floralwhite;">
+            <MudForm Model="@model" @ref="@form" Validation="@(createCategoryValidator.ValidateValue)" ValidationDelay="0">
+                <MudCardContent>
+
+                    @if (errorMessage is not null)
+                    {
+                        <div style="display: flex; justify-content: center;">
+                            <MudAlert Severity="MudBlazor.Severity.Error">@errorMessage</MudAlert>
+                        </div>
+                    }
+
+                    <MudTextField @bind-Value="model.Name"
+                                  For="@(() => model.Name)"
+                                  Immediate="true"
+                                  Label="Nom" />
+
+                    <MudTextField @bind-Value="model.Description"
+                                  For="@(() => model.Description)"
+                                  Immediate="true"
+                                  Label="Qo'shimcha malumot" />
+
+                </MudCardContent>
+            </MudForm>
+
+            <div style="display: flex; justify-content: center;">
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-1" OnClick="@(async () => await CreateCategory())">KATEGORIYA YARATISH</MudButton>
+                </MudCardActions>
+            </div>
+            <br />
+        </MudCard>
+    </div>
+</div>
+
+
+@code {
+    string? errorMessage;
+    string? errorDetails;
+    MudForm? form;
+
+    CreateCategoryFluentValidator createCategoryValidator = new CreateCategoryFluentValidator();
+    CreateCategory model = new CreateCategory();
+
+    private async Task CreateCategory()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            if (string.IsNullOrEmpty(model.Description))
+                model.Description = null;
+
+            var result = await categoryService.CreateCategoryAsync(model);
+
+            if (result.IsSuccess)
+            {
+                var kategoryId = result.Data;
+                NavManager.NavigateTo($"/Kategoriya/{kategoryId}");
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage;
+                errorDetails = result.ErrorDetails;
+
+                if (errorDetails is not null)
+                    await SendTelegramMessage.SendTelegram(errorDetails, configuration);
+            }
+        }
+    }
+
+
+
+    public class CreateCategoryFluentValidator : AbstractValidator<CreateCategory>
+    {
+        public CreateCategoryFluentValidator()
+        {
+            RuleFor(x => x.Name)
+                 .NotEmpty().WithMessage("Nom kiriting")
+                 .Length(3, 20).WithMessage("Nom kamida 3 va ko'pi bilan 20 belgidan iborat bo'lishi kerak");
+
+            RuleFor(x => x.Description)
+                 .Cascade(CascadeMode.StopOnFirstFailure)
+                 .Must(ValidateDescription).WithMessage("Malumot kamida 3 va ko'pi bilan 20 belgidan iborat bo'lishi yoki bo'sh qoldirilishi kerak");
+
+        }
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<CreateCategory>.CreateWithOptions((CreateCategory)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+
+        private bool ValidateDescription(string description)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+                return true;
+
+            return description.Length >= 3 && description.Length <= 20;
+        }
+    }
+
+}
+
+
+
+
+

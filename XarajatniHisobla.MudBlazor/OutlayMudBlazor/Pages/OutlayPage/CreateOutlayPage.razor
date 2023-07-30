@@ -1,0 +1,193 @@
+﻿@page "/XarajatQo'shish"
+
+@using FluentValidation
+@using Newtonsoft.Json;
+@using OutlayMudBlazor.Dtoes;
+@using OutlayMudBlazor.Services;
+@inject NavigationManager NavManager
+@inject CategoryService categoryService
+@inject OutlayService outlayService
+
+@if (errorMessage1 is not null)
+{
+    <div style="display: flex; justify-content: center;">
+        <MudAlert Severity="MudBlazor.Severity.Error">@errorMessage1</MudAlert>
+    </div>
+}
+else if(Elements?.Count() == 0)
+{
+    <div style="text-align: center;">
+        <h1>Kategori mavjud emas</h1>
+
+    </div>
+}
+else
+{
+    <div style="display: flex; justify-content: center;">
+        <div style="width: 35%;">
+            <MudCard style="background-color:floralwhite;">
+                <MudForm Model="@model" @ref="@form" Validation="@(createOutlayValidator.ValidateValue)" ValidationDelay="0">
+                    <MudCardContent>
+
+                        @if (errorMessage is not null)
+                        {
+                            <div style="display: flex; justify-content: center;">
+                                <MudAlert Severity="MudBlazor.Severity.Error">@errorMessage</MudAlert>
+                            </div>
+                        }
+
+                        <MudTextField @bind-Value="model.Name"
+                                  For="@(() => model.Name)"
+                                  Immediate="true"
+                                  Label="Nom" />
+
+                        <MudTextField @bind-Value="model.Description"
+                                  For="@(() => model.Description)"
+                                  Immediate="true"
+                                  Label="Qo'shimcha malumot" />
+
+                        <MudTextField @bind-Value="model.Cost"
+                                  For="@(() => model.Cost)"
+                                  Immediate="true"
+                                  Label="Narx" />
+
+                        <MudAutocomplete T="string" Label="Kategoriyalar" @bind-Value="value1" SearchFunc="@Search1"
+                                     ResetValueOnEmptyText="@resetValueOnEmptyText"
+                                     Immediate="true"
+                                     CoerceText="@coerceText" CoerceValue="@coerceValue" For="@(() => value1)"
+                                     AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+
+                    </MudCardContent>
+                </MudForm>
+                <div style="display: flex; justify-content: center;">
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-1" OnClick="@(async () => await MakeOutlay())">XARAJAT QO'SHISH</MudButton>
+                    </MudCardActions>
+                </div>
+
+                <br />
+            </MudCard>
+        </div>
+    </div>
+}
+
+
+
+@code {
+    private bool resetValueOnEmptyText;
+    private bool coerceText;
+    private bool coerceValue;
+
+    private string? value1;
+    private List<string>? categories = new List<string>();
+
+    private async Task<IEnumerable<string>> Search1(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+        await Task.Delay(5);
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return categories;
+        return categories.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+}
+
+
+
+@code {
+    string? errorMessage;
+    string? errorMessage1;
+    MudForm? form;
+
+    CreateOutlayFluentValidator createOutlayValidator = new CreateOutlayFluentValidator();
+
+    CreateOutlay model = new CreateOutlay();
+
+    private List<Categories>? Elements = new List<Categories>();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var result = await categoryService.GetCategoriesAsync();
+        if (result.IsSuccess)
+        {
+            Elements = result.Data;
+            categories = Elements?.Select(x => x.Name).ToList();
+        }
+        else
+        {
+            errorMessage1 = result.ErrorMessage;
+
+        }
+    }
+
+    private async Task MakeOutlay()
+    {
+        await form.Validate();
+        if (!categories.Contains(value1))
+        {
+            errorMessage = "Mavjud kategoriyalardan birini tanlang!";
+        }
+        else
+        {
+            if (form.IsValid)
+            {
+                if (string.IsNullOrEmpty(model.Description))
+                model.Description = null;
+
+                model.CategoryId = Elements.First(x => x.Name == value1).Id;
+
+                var result = await outlayService.CreateOutlayAsync(model);
+
+                if (result.IsSuccess)
+                {
+                    NavManager.NavigateTo($"/Kategoriya/{model.CategoryId}");
+                }
+                else
+                {
+                    errorMessage = result.ErrorMessage;
+                }
+            }
+        }
+    }
+
+
+
+    public class CreateOutlayFluentValidator : AbstractValidator<CreateOutlay>
+    {
+        public CreateOutlayFluentValidator()
+        {
+            RuleFor(x => x.Name)
+                 .NotEmpty().WithMessage("Nom kiriting")
+                 .Length(3, 20).WithMessage("Nom kamida 3 va ko'pi bilan 20 belgidan iborat bo'lishi kerak");
+
+            RuleFor(x => x.Description)
+                  .Cascade(CascadeMode.StopOnFirstFailure)
+                  .Must(ValidateDescription).WithMessage("Malumot kamida 3 va ko'pi bilan 20 belgidan iborat bo'lishi yoki bo'sh qoldirilishi kerak");
+
+            RuleFor(x => x.Cost)
+                 .NotEmpty().WithMessage("Narxni kiriting")
+                //       .Must(cost=>cost.GetType() == typeof(int)).WithMessage("Narx to'g'ri kiritilmadi")
+                 .NotEqual(0).WithMessage("Narx 0 ga teng bo'la olmaydi");
+        }
+
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<CreateOutlay>.CreateWithOptions((CreateOutlay)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+
+        private bool ValidateDescription(string description)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+                return true;
+
+            return description.Length >= 3 && description.Length <= 20;
+        }
+    }
+}

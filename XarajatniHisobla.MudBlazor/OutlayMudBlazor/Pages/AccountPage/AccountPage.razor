@@ -1,0 +1,155 @@
+﻿@page "/profil"
+@using OutlayMudBlazor.Dtoes;
+@inject NavigationManager NavManager
+@using System.Net;
+@using OutlayMudBlazor.Services;
+@inject AccountService accountService
+
+@if (errorMessage is not null)
+{
+    <div style="display: flex; justify-content: center;">
+        <MudAlert Severity="MudBlazor.Severity.Error">@errorMessage</MudAlert>
+    </div>
+}
+else
+{
+    <div style="display: flex; justify-content: center;">
+        <div style="width: 40%;">
+            <MudCard style="background-color:powderblue;">
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        @if (userName is not null)
+                        {
+                            <MudAvatar Color="Color.Info">@userName[0]</MudAvatar>
+
+                        }
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.body1"><h1>@userName</h1></MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton href="/ShaxsiyMalumotlarniO'zgartirish" Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+                @if (imageSrc != null)
+                {
+                    <br />
+                    <MudCardMedia Image="@imageSrc" Height="250" />
+                    <MudCardActions>
+
+
+                        <div style="margin-right: auto;">
+                            &nbsp;&nbsp;
+                            <label class="custom-file-upload">
+                                <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                                <InputFile OnChange="OnFileSelected" hidden multiple accept=".jpg,.jpeg,.png,.gif" />
+                            </label>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <MudIconButton @onclick="async () => await Delete()" Icon="@Icons.Material.Filled.Delete" Size="Size.Medium" Color="Color.Default" />
+
+                        </div>
+                    </MudCardActions>
+                }
+                else
+                {
+                    <br />
+                    <MudCardActions style="display: flex; justify-content: flex-end;">
+
+                        <div style="margin-left: auto;">
+                            <h2>
+                                Rasmni qo'shish &nbsp;&nbsp;
+                                <label class="custom-file-upload">
+                                    <InputFile OnChange="OnFileSelected" hidden multiple accept=".jpg,.jpeg,.png,.gif" />
+                                    <span> <MudIcon Icon="@Icons.Material.Filled.AddAPhoto" /></span>&nbsp;&nbsp;
+                                </label>
+                            </h2>
+                        </div>
+
+                    </MudCardActions>
+                }
+
+            </MudCard>
+        </div>
+    </div>
+}
+
+
+
+@code {
+    string? userName;
+    bool isHave = false;
+    string? imageSrc;
+    private string? errorMessage;
+    Avatar model = new Avatar();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await accountService.GetAccountAsync();
+
+        if (result.IsSuccess)
+        {
+             isHave = true;
+
+            var userVM = result.Data;
+
+            userName = userVM?.Name;
+
+            if (userVM?.Bytes is not null)
+            {
+                var base64 = Convert.ToBase64String(userVM.Bytes);
+                imageSrc = string.Format("data:image/png;base64,{0}", base64);
+            }
+            else
+                imageSrc = null;
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+    }
+
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var ms = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(ms);
+            var imageData = ms.ToArray();
+
+            var base64 = Convert.ToBase64String(imageData);
+            imageSrc = string.Format("data:image/png;base64,{0}", base64);
+
+            model.Bytes = imageData;
+
+
+            var result = await accountService.CreateOrUpdateAvatar(model);
+
+            if (result.IsSuccess)
+            {
+                 NavManager.NavigateTo(NavManager.Uri, true);
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage;
+            }
+        }
+    }
+
+
+    private async Task Delete()
+    {
+        var result = await accountService.DeleteAvatarAsync();
+
+        if (result.IsSuccess)
+        {
+                NavManager.NavigateTo(NavManager.Uri, true);
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+    }
+}

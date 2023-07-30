@@ -1,0 +1,148 @@
+﻿@page "/QarzQo'shish"
+
+@using FluentValidation
+@using Newtonsoft.Json;
+@using OutlayMudBlazor.Dtoes;
+@using OutlayMudBlazor.Services;
+@inject NavigationManager NavManager
+@inject DebtService debtService
+
+<div style="display: flex; justify-content: center;">
+    <div style="width: 35%;">
+        <MudCard style="background-color:floralwhite;">
+            <MudForm Model="@model" @ref="@form" Validation="@(createDebtDtoValidator.ValidateValue)" ValidationDelay="0">
+                <MudCardContent>
+
+                    @if (errorMessage is not null)
+                    {
+                        <div style="display: flex; justify-content: center;">
+                            <MudAlert Severity="MudBlazor.Severity.Error">@errorMessage</MudAlert>
+                        </div>
+                    }
+
+                    <MudTextField @bind-Value="model.Cost"
+                                  For="@(() => model.Cost)"
+                                  Immediate="true"
+                                  Label="Pulning miqdori" />
+
+                    <MudTextField @bind-Value="model.Description"
+                                For="@(() => model.Description)"
+                                Immediate="true"
+                                Label="Qo'shimcha malumot" />
+
+                    
+                    <MudTextField @bind-Value="model.ReceiverName"
+                                For="@(() => model.ReceiverName)"
+                                Immediate="true"
+                                Label="2 - shaxsning nomi" />
+
+                    <MudTextField @bind-Value="model.GivenPersonName"
+                                  For="@(() => model.GivenPersonName)"
+                                  Immediate="true"
+                                  Label="Pul berilishi kerak bo'lgan shaxsning ismi" />
+
+                    <MudTextField @bind-Value="lastAtString" For="@(() => lastAtString)" Label="Qaytarish sanasi" InputType="InputType.Date" />
+
+
+
+
+                </MudCardContent>
+            </MudForm>
+            <div style="display: flex; justify-content: center;">
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-1" OnClick="@(async () => await MakeOutlay())">QARZ QO'SHISH</MudButton>
+                </MudCardActions>
+            </div>
+
+            <br />
+        </MudCard>
+    </div>
+</div>
+
+
+
+@code {
+    string? errorMessage;
+    MudForm? form;
+
+    CreateDebtDtoFluentValidator createDebtDtoValidator = new CreateDebtDtoFluentValidator();
+
+    CreateDebt model = new CreateDebt();
+
+    public string? lastAtString;
+
+
+    private async Task MakeOutlay()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            if (string.IsNullOrEmpty(model.Description))
+                model.Description = null;
+
+            if (lastAtString != "mm-dd-yyyy" && !string.IsNullOrEmpty(lastAtString))
+                model.LastAt = DateTime.Parse(lastAtString);
+            else
+                model.LastAt = null;
+
+            var result = await debtService.CreateDebtAsync(model);
+
+            if (result.IsSuccess)
+            {
+                NavManager.NavigateTo($"/XabarnomalarniKo'rish", true);
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage;
+            }
+        }
+    }
+
+
+
+    public class CreateDebtDtoFluentValidator : AbstractValidator<CreateDebt>
+    {
+        public CreateDebtDtoFluentValidator()
+        {
+            RuleFor(x => x.ReceiverName)
+                 .NotEmpty().WithMessage("2 - shaxsning nomini kiriting")
+                 .Length(4, 20).WithMessage("2 - shaxsning nomi kamida 4 va ko'pi bilan 20 belgidan iborat bo'lishi kerak");
+
+
+            RuleFor(x => x.GivenPersonName)
+                 .NotEmpty().WithMessage("Pul berilishi kerak bo'lgan shaxsning ismini kiriting")
+                 .Length(4, 20).WithMessage("Pul berilishi kerak bo'lgan shaxsning ismi kamida 4 va ko'pi bilan 20 belgidan iborat bo'lishi kerak");
+
+            RuleFor(x => x.Description)
+                  .Cascade(CascadeMode.StopOnFirstFailure)
+                  .Must(ValidateDescription).WithMessage("Malumot kamida 3 va ko'pi bilan 20 belgidan iborat bo'lishi yoki bo'sh qoldirilishi kerak");
+
+            RuleFor(x => x.Cost)
+                 .NotEmpty().WithMessage("Pul miqdorini kiriting")
+                 .NotEqual(0).WithMessage("Puning miqdori 0 ga teng bo'la olmaydi");
+
+        }
+
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<CreateDebt>.CreateWithOptions((CreateDebt)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+
+        private bool ValidateDescription(string description)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+                return true;
+
+            return description.Length >= 3 && description.Length <= 20;
+        }
+    }
+}
+
+
+
+
+

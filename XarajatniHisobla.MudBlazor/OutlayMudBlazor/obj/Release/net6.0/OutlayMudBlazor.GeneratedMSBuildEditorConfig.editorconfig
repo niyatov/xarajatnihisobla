@@ -1,0 +1,129 @@
+is_global = true
+build_property.TargetFramework = net6.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = OutlayMudBlazor
+build_property.RootNamespace = OutlayMudBlazor
+build_property.ProjectDir = C:\Users\acer\Desktop\OutlayMudBlazor - Last - Copy (4)\OutlayMudBlazor\
+build_property.RazorLangVersion = 6.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\acer\Desktop\OutlayMudBlazor - Last - Copy (4)\OutlayMudBlazor
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/AccountPage/AccountPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFBhZ2VcQWNjb3VudFBhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/AccountPage/RegisterPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFBhZ2VcUmVnaXN0ZXJQYWdlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/AccountPage/SignInPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFBhZ2VcU2lnbkluUGFnZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/AccountPage/UpdateAccountPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFBhZ2VcVXBkYXRlQWNjb3VudFBhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/CategoryPage/CreatePrivateCategoryPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlQYWdlXENyZWF0ZVByaXZhdGVDYXRlZ29yeVBhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/CategoryPage/CreatePublicCategoryPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlQYWdlXENyZWF0ZVB1YmxpY0NhdGVnb3J5UGFnZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/CategoryPage/GetCategoriesPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlQYWdlXEdldENhdGVnb3JpZXNQYWdlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/CategoryPage/GetCategoryPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlQYWdlXEdldENhdGVnb3J5UGFnZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/CategoryPage/GetStatisticsPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlQYWdlXEdldFN0YXRpc3RpY3NQYWdlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/CategoryPage/JoinCategoryPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlQYWdlXEpvaW5DYXRlZ29yeVBhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/CategoryPage/ShowUsersPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlQYWdlXFNob3dVc2Vyc1BhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/CategoryPage/UpdateCategoryPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlQYWdlXFVwZGF0ZUNhdGVnb3J5UGFnZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/DebtPage/CreateDebtPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVidFBhZ2VcQ3JlYXRlRGVidFBhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/DebtPage/GetDebtsOnlyGetPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVidFBhZ2VcR2V0RGVidHNPbmx5R2V0UGFnZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/DebtPage/GetDebtsOnlyGivePage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVidFBhZ2VcR2V0RGVidHNPbmx5R2l2ZVBhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/DebtPage/GetDebtsPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVidFBhZ2VcR2V0RGVidHNQYWdlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/DebtPage/GetNotificationDebtsPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVidFBhZ2VcR2V0Tm90aWZpY2F0aW9uRGVidHNQYWdlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/DebtPage/GetStatisticsForDebtPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVidFBhZ2VcR2V0U3RhdGlzdGljc0ZvckRlYnRQYWdlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/DebtPage/UpdateDebtPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVidFBhZ2VcVXBkYXRlRGVidFBhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/DebtPage/UpdateDebtsAndSendPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGVidFBhZ2VcVXBkYXRlRGVidHNBbmRTZW5kUGFnZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/MainPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTWFpblBhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/OutlayPage/CreateOutlayPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT3V0bGF5UGFnZVxDcmVhdGVPdXRsYXlQYWdlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/OutlayPage/GetOutlayPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT3V0bGF5UGFnZVxHZXRPdXRsYXlQYWdlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Pages/OutlayPage/UpdateOutlayPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT3V0bGF5UGFnZVxVcGRhdGVPdXRsYXlQYWdlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Shared/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/Shared/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE5hdk1lbnUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/acer/Desktop/OutlayMudBlazor - Last - Copy (4)/OutlayMudBlazor/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 

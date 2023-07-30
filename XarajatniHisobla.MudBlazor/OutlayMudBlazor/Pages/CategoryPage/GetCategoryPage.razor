@@ -1,0 +1,355 @@
+﻿@page "/Kategoriya/{kategoriyaId}"
+
+@using FluentValidation
+@using Newtonsoft.Json;
+@using OutlayMudBlazor.Dtoes;
+@inject NavigationManager NavManager
+@using System.Net.Http.Json
+@using System.Net;
+@using OutlayMudBlazor.Services;
+@inject HttpClient httpClient
+@inject CategoryService categoryService
+@inject OutlayService outlayService
+@inject IConfiguration configuration
+
+@if (errorMessage is not null || errorMessage2 is not null)
+{
+    <div style="display: flex; justify-content: center;">
+        <MudAlert Severity="MudBlazor.Severity.Error">@(errorMessage ?? errorMessage2)</MudAlert>
+    </div>
+}
+else if (IsNotFound)
+{
+    <div style="text-align: center;">
+        <h1>Sahifa topilmadi</h1>
+    </div>
+}
+else
+{
+    <div style="display: flex; justify-content: center;">
+        <div style="width: 40%;">
+            <MudCard style="background-color:powderblue;">
+                <MudCardContent>
+                    <MudText style="text-align: center;" Typo="Typo.h5">@Element?.Name</MudText>
+                    <br />
+                    @if (@Element.Type is "Private")
+                    {
+                        <MudText Typo="Typo.body2"> Turi: &nbsp;&nbsp; <span style="color:black;">shaxsiy</span></MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2"> Turi: &nbsp;&nbsp; <span style="color:black;">ommaviy</span></MudText>
+                    }
+
+                    @if (@Element.Description is not null)
+                    {
+                        <MudText Typo="Typo.body2"> Qo'shimcha malumot:&nbsp;&nbsp; <span style="color:black;">@Element?.Description</span></MudText>
+
+                    }
+
+                    @if (@Element.Type is "Public")
+                    {
+                        @if (@Element.IsAdmin is true)
+                        {
+                            <MudText Typo="Typo.body2"> Siz bu guruhda: &nbsp;&nbsp; <span style="color:black;">admin</span></MudText>
+                            @if (@Element.Type is "Public")
+                            {
+                                <MudText Typo="Typo.body2"> Parol: &nbsp;&nbsp; <span style="color:black;">@Element.Key</span></MudText>
+                            }
+
+                        }
+                        else
+
+                        {
+                            <MudText Typo="Typo.body2"> Siz bu guruhda: &nbsp;&nbsp; <span style="color:black;">foydalanuvchi</span></MudText>
+                        }
+                    }
+
+                    <MudText Typo="Typo.body2">Xarajatlar soni: &nbsp;&nbsp; <span style="color:black;">@Elements.Count()</span></MudText>
+                    <MudText Typo="Typo.body2"> Yaratilgan sana: &nbsp;&nbsp; <span style="color:black;">@Element.CreateAt</span></MudText>
+
+                    @if (Element.LastUpdateAt is not null)
+                    {
+                        <MudText Typo="Typo.body2"> Oxirgi o'zgartirilgan sana: &nbsp;&nbsp; <span style="color:black;">@Element.LastUpdateAt</span></MudText>
+                    }
+                </MudCardContent>
+
+                @if (@Element.IsAdmin is true)
+                {
+                    <MudCardActions style="display: flex; justify-content: flex-end;">
+                        @if (@Element.Type is "Private")
+                        {
+                            <div style="margin-right: auto;">
+                                <MudIconButton OnClick="(() => GoToStatistics(kategoriyaId))" Icon="@Icons.Material.TwoTone.Analytics" Color="Color.Default" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="margin-right: auto;">
+                                <MudIconButton OnClick="(() => GoToUsers(kategoriyaId))" Icon="@Icons.Material.Filled.People" Color="Color.Default" />
+                                <MudIconButton OnClick="(() => GoToStatistics(kategoriyaId))" Icon="@Icons.Material.TwoTone.Analytics" Color="Color.Default" />
+
+                            </div>
+                        }
+
+                        <div style="margin-left: auto;">
+                            <MudIconButton OnClick="(() => GoToUpdateCategory(kategoriyaId,Element.Type))" Icon="@Icons.Material.Filled.Edit" Color="Color.Default" />
+                            <MudIconButton @onclick="async () => await Clean()" Icon="@Icons.Material.Filled.CleaningServices" Color="Color.Default" />
+                            <MudIconButton @onclick="async () => await Delete()" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" />
+                        </div>
+
+                    </MudCardActions>
+                }
+                else
+                {
+                    <MudCardActions style="display: flex; justify-content: flex-end;">
+
+                        @if (@Element.Type is "Private")
+                        {
+                            <div style="margin-right: auto;">
+                                <MudIconButton OnClick="(() => GoToStatistics(kategoriyaId))" Icon="@Icons.Material.TwoTone.Analytics" Color="Color.Default" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="margin-right: auto;">
+                                <MudIconButton OnClick="(() => GoToUsers(kategoriyaId))" Icon="@Icons.Material.Filled.People" Color="Color.Default" />
+                                <MudIconButton OnClick="(() => GoToStatistics(kategoriyaId))" Icon="@Icons.Material.TwoTone.Analytics" Color="Color.Default" />
+
+                            </div>
+                        }
+
+                    </MudCardActions>
+                }
+
+            </MudCard>
+        </div>
+    </div>
+    <br />
+    <br />
+
+
+    @if (Elements == null || Elements.Count() < 1)
+    {
+        <div style="text-align: center;">
+            <h1>Xarajatlar mavjud emas</h1>
+
+        </div>
+    }
+    else
+    {
+        <MudTable style="background-color:floralwhite;" Items="@Elements" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Filter="new Func<Outlays,bool>(FilterFunc1)" @bind-SelectedItem="selectedItem1">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Xarajatlar</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString1" Placeholder="Qidirish" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+
+
+            <ColGroup>
+
+                @if (@Element.Type is "Private")
+                {
+                    <col style="width: 1%;" />
+                    <col style="width: 38%;" />
+                    <col style="width: 27%;" />
+                    <col style="width: 24%;" />
+                }
+                else
+                {
+                    <col style="width: 1%;" />
+                    <col style="width: 30%;" />
+                    <col style="width: 29%;" />
+                    <col style="width: 16%;" />
+                    <col style="width: 24%;" />
+                }
+
+
+            </ColGroup>
+
+            <HeaderContent>
+                <MudTh style="text-align: center;">Tartib raqam </MudTh>
+                <MudTh style="text-align: center;">Nom </MudTh>
+                <MudTh style="text-align: center;">Qo'shimcha malumot</MudTh>
+                <MudTh style="text-align: center;">Narxi</MudTh>
+                @if (@Element.Type is not "Private")
+                {
+                    <MudTh style="text-align: center;"> Kimga tegishliligi</MudTh>
+                }
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd style="text-align: center;">@context.Index</MudTd>
+                <MudTd> <MudButton OnClick="(() => GoToOutlay(context.Id))" Variant="Variant.Text" Color="Color.Primary"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @context.Name</MudButton> </MudTd>
+                @if (context.Description is not null)
+                {
+                    if (context.Description.Length > 40)
+                    {
+
+                        <MudTd> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @(context.Description.Substring(0, 37) + "...")</MudTd>
+                    }
+                    else
+                    {
+                        <MudTd> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @context.Description</MudTd>
+                    }
+                }
+                else
+                {
+                    <MudTd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bo'sh</MudTd>
+                }
+
+                <MudTd style="text-align: center;">@context.Cost</MudTd>
+                @if (@Element.Type is not "Private")
+                {
+                    <MudTd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @context.Username</MudTd>
+                }
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager RowsPerPageString="Har bir sahifadagi qatorlar:"
+                       FirstPageLabel="Birinchi sahifa"
+                       LastPageLabel="So'nggi sahifa"
+                       ItemsPerPageLabel="Qatorlar soni: "
+                       PageLabel=" sahifa"
+                       OfLabel=" dan" />
+
+            </PagerContent>
+        </MudTable>
+        <div class="d-flex flex-wrap mt-4">
+            <MudSwitch @bind-Checked="@dense" Color="Color.Secondary">Zich</MudSwitch>
+            <MudSwitch @bind-Checked="@striped" Color="Color.Success">Yo'l-yo'l</MudSwitch>
+            <MudSwitch @bind-Checked="@bordered" Color="Color.Warning">Chegara</MudSwitch>
+            <MudSpacer />
+        </div>
+    }
+
+}
+
+
+
+@code {
+    [Parameter]
+    public string? kategoriyaId { get; set; }
+    string? errorMessage;
+    string? errorMessage2;
+    string? errorDeleteMessage;
+    string? errorDetails;
+    string? errorDetails2;
+    string? errorCleanMessage;
+    private bool IsNotFound;
+    private bool enabled = true;
+    private bool dense = true;
+    private bool hover = true;
+    private bool striped = true;
+    private bool bordered = true;
+    private string searchString1 = "";
+    private Outlays selectedItem1 = null;
+
+    private HashSet<Outlays> selectedItems = new HashSet<Outlays>();
+    private Category? Element = new Category();
+
+    private List<Outlays>? Elements = new List<Outlays>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await categoryService.GetCategoryAsync(kategoriyaId);
+
+        if (result.IsSuccess)
+            Element = result.Data;
+        else
+        {
+            errorMessage = result.ErrorMessage;
+            errorDetails = result.ErrorDetails;
+            IsNotFound = result.IsNotFound;
+
+            if (errorDetails is not null)
+                await SendTelegramMessage.SendTelegram(errorDetails, configuration);
+        }
+
+        var result2 = await outlayService.GetOutlaysAsync(kategoriyaId);
+
+        if (result2.IsSuccess)
+            Elements = result2.Data;
+        else
+        {
+            errorMessage2 = result2.ErrorMessage;
+        }
+    }
+
+    private bool FilterFunc1(Outlays element) => FilterFunc(element, searchString1);
+
+    private bool FilterFunc(Outlays element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Description is not null)
+            if (element.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+        if (element.Username.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Cost.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private void GoToUsers(string kategoriyaId)
+    {
+        NavManager.NavigateTo($"/FoydalanuvchilarniKor'rsat/{kategoriyaId}");
+    }
+
+    private void GoToStatistics(string kategoriyaId)
+    {
+        NavManager.NavigateTo($"/StatistikaniKo'rish/{kategoriyaId}");
+    }
+
+    private void GoToUpdateCategory(string kategoriyaId,string type)
+    {
+        NavManager.NavigateTo($"/KategoriyaniO'zgartirish/{kategoriyaId}/{type}");
+    }
+
+    private void GoToOutlay(int outlayId)
+    {
+        NavManager.NavigateTo($"/Xarajat/{outlayId}");
+    }
+
+    private async Task Delete()
+    {
+        var result = await categoryService.DeleteCategoryAsync(kategoriyaId);
+
+        if (result.IsSuccess)
+            NavManager.NavigateTo("/Kategoriyalar");
+        else
+        {
+            errorMessage = result.ErrorMessage;
+            errorDetails = result.ErrorDetails;
+
+            if (errorDetails is not null)
+                await SendTelegramMessage.SendTelegram(errorDetails, configuration);
+        }
+    }
+
+    private async Task Clean()
+    {
+        var result = await categoryService.CleanCategoryAsync(kategoriyaId);
+
+        if (result.IsSuccess)
+            NavManager.NavigateTo(NavManager.Uri, true);
+        else
+        {
+            errorMessage = result.ErrorMessage;
+            errorDetails = result.ErrorDetails;
+
+            if (errorDetails is not null)
+                await SendTelegramMessage.SendTelegram(errorDetails, configuration);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+

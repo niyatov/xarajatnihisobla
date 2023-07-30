@@ -1,0 +1,112 @@
+﻿@page "/OmmaviyKategoriyagaQo'shilish"
+
+@using FluentValidation
+@using Newtonsoft.Json;
+@using OutlayMudBlazor.Dtoes;
+@using OutlayMudBlazor.Services;
+@inject NavigationManager NavManager
+@inject CategoryService categoryService
+@inject IConfiguration configuration
+
+<div style="display: flex; justify-content: center;">
+    <div style="width: 35%;">
+        <MudCard style="background-color:floralwhite;">
+            <MudForm Model="@model" @ref="@form" Validation="@(joinCategoryValidator.ValidateValue)" ValidationDelay="0">
+                <MudCardContent>
+
+                    @if (errorMessage is not null)
+                    {
+                        <div style="display: flex; justify-content: center;">
+                            <MudAlert Severity="MudBlazor.Severity.Error">@errorMessage</MudAlert>
+                        </div>
+                    }
+
+                    <MudTextField @bind-Value="model.Name"
+                                  For="@(() => model.Name)"
+                                  Immediate="true"
+                                  Label="Nom" />
+
+                    <MudTextField @bind-Value="model.Key"
+                                  For="@(() => model.Key)"
+                                  Immediate="true"
+                                  Label="Parol" />
+
+                </MudCardContent>
+            </MudForm>
+            <div style="display: flex; justify-content: center;">
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-1" OnClick="@(async () => await AddCategory())">OMMAVIY KATEGORIYAGA QO'SHILISH</MudButton>
+                </MudCardActions>
+            </div>
+            <br />
+        </MudCard>
+    </div>
+</div>
+
+
+
+
+@code {
+    string? errorMessage;
+    string? errorDetails;
+    MudForm? form;
+
+    JoinCategoryFluentValidator joinCategoryValidator = new JoinCategoryFluentValidator();
+
+    JoinCategory model = new JoinCategory();
+
+
+    private async Task AddCategory()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            var result = await categoryService.JoinCategoryAsync(model);
+
+            if (result.IsSuccess)
+            {
+                var kategoryId = result.Data;
+                NavManager.NavigateTo($"/Kategoriya/{kategoryId}");
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage;
+                errorDetails = result.ErrorDetails;
+
+                if (errorDetails is not null)
+                    await SendTelegramMessage.SendTelegram(errorDetails, configuration);
+            }
+        }
+
+    }
+
+
+
+    public class JoinCategoryFluentValidator : AbstractValidator<JoinCategory>
+    {
+        public JoinCategoryFluentValidator()
+        {
+            RuleFor(x => x.Name)
+                 .NotEmpty().WithMessage("Nom kiriting")
+                 .Length(3, 20).WithMessage("Nom kamida 3 va ko'pi bilan 20 belgidan iborat bo'lishi kerak");
+
+            RuleFor(x => x.Key)
+                 .NotEmpty().WithMessage("Parolni kiriting")
+                 .Length(4, 30).WithMessage("Parol kamida 4 va ko'pi bilan 30 belgidan iborat bo'lishi kerak");
+        }
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<JoinCategory>.CreateWithOptions((JoinCategory)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+    }
+}
+
+
+
+
+

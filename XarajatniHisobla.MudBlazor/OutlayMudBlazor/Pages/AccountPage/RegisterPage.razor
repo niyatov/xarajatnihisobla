@@ -1,0 +1,141 @@
+﻿@page "/Ro'yxatdan_o'tish"
+@using FluentValidation
+@using OutlayMudBlazor.Dtoes;
+@inject NavigationManager NavManager
+@using System.Web;
+@using OutlayMudBlazor.Services;
+@inject AccountService accountService;
+
+
+
+<div style="display: flex; justify-content: center;">
+    <div style="width: 433px;">
+        <MudCard style="background-color:floralwhite;">
+            <MudForm Model="@model" @ref="@form" Validation="@(registerDtoValidator.ValidateValue)" ValidationDelay="0">
+                <MudCardContent>
+
+
+                    @if (errorMessage is not null)
+                    {
+                        <div style="display: flex; justify-content: center;">
+                            <MudAlert Severity="MudBlazor.Severity.Error">@errorMessage</MudAlert>
+                        </div>
+                    }
+
+                    <MudTextField @bind-Value="model.Username"
+                                  For="@(() => model.Username)"
+                                  Immediate="true"
+                                  Label="Ismingiz" />
+
+                    <MudTextField @bind-Value="model.Email"
+                                  For="@(() => model.Email)"
+                                  Immediate="true"
+                                  Label="Email" />
+
+                    <MudTextField @bind-Value="model.Password"
+                                  For="@(() => model.Password)"
+                                  Immediate="true"
+                                  Label="Parol" InputType="InputType.Password" />
+
+                    <MudTextField @bind-Value="model.ConfirmPassword"
+                                  For="@(() => model.ConfirmPassword)"
+                                  Immediate="true"
+                                  Label="Parolni takrorlang" InputType="InputType.Password" />
+
+                </MudCardContent>
+            </MudForm>
+            <div style="display: flex; justify-content: center;">
+                <MudCardActions>
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" Class="ml-auto" OnClick="@(async () => await SignIn())">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kirish&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</MudButton>
+                    &nbsp;&nbsp;  <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-1" OnClick="@(async () => await Registerr())">RO'YXATDAN O'TISH</MudButton>
+                </MudCardActions>
+            </div>
+
+            <div style="display: flex; justify-content: center;">
+                <MudAlert Severity="MudBlazor.Severity.Info">Oldin ro'yxatdan o'tgan bo'lsangiz KIRISH ga bosing</MudAlert>
+            </div>
+
+
+            <br />
+        </MudCard>
+    </div>
+</div>
+
+
+
+
+@code {
+    string? errorMessage;
+    MudForm? form;
+    string returnUrl;
+
+    protected override void OnInitialized()
+    {
+        var uri = new Uri(NavManager.Uri);
+        returnUrl = HttpUtility.ParseQueryString(uri.Query).Get("returnUrl");
+    }
+
+    RegisterDtoFluentValidator registerDtoValidator = new RegisterDtoFluentValidator();
+    Register model = new Register();
+
+
+    private async Task Registerr()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            var result = await accountService.RegisterAsync(model);
+
+            if (result.IsSuccess)
+            {
+                NavManager.NavigateTo("/kirish?returnUrl=" + HttpUtility.UrlEncode(returnUrl));
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage;
+            }
+        }
+
+    }
+
+    private async Task SignIn()
+    {
+        NavManager.NavigateTo("/kirish?returnUrl=" + HttpUtility.UrlEncode(returnUrl));
+    }
+
+
+    public class RegisterDtoFluentValidator : AbstractValidator<Register>
+    {
+        public RegisterDtoFluentValidator()
+        {
+            RuleFor(x => x.Username)
+                 .NotEmpty().WithMessage("Ismingizni kiriting")
+                 .Length(4, 20).WithMessage("Ism kamida 4 va ko'pi bilan 20 belgidan iborat bo'lishi kerak");
+
+            RuleFor(x => x.Password)
+                .NotEmpty().WithMessage("Parolni kiriting")
+                .Length(6, 30).WithMessage("Parol kamida 6 va ko'pi bilan 30 belgidan iborat bo'lishi kerak");
+
+            RuleFor(x => x.Email)
+              .NotEmpty().WithMessage("emailni kiriting")
+              .EmailAddress().WithMessage("email address noto'g'ri kiritildi")
+              .Length(4, 64).WithMessage("email kamida 4 va ko'pi bilan 64 belgidan iborat bo'lishi kerak");
+
+            RuleFor(x => x.ConfirmPassword)
+                .NotEmpty().WithMessage("parolni kiriting")
+                .Length(6, 30).WithMessage("Parol kamida 6 va ko'pi bilan 30 belgidan iborat bo'lishi kerak")
+                .Equal(x => x.Password).WithMessage("Parol oldingi parol bilan mos kelmadi"); ;
+        }
+
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<Register>.CreateWithOptions((Register)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+    }
+}

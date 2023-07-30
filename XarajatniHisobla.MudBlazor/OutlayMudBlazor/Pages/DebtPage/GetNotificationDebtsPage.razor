@@ -1,0 +1,311 @@
+﻿@page "/XabarnomalarniKo'rish"
+
+@using FluentValidation
+@using Newtonsoft.Json;
+@using OutlayMudBlazor.Dtoes;
+@inject NavigationManager NavManager
+@using System.Net.Http.Json
+@using OutlayMudBlazor.Services;
+@inject HttpClient httpClient
+@inject DebtService debtService
+@inject AccountService accountService
+
+@if (errorMessage is not null || errorMessage2 is not null)
+{
+    <div style="display: flex; justify-content: center;">
+        <MudAlert Severity="MudBlazor.Severity.Error">@(errorMessage ?? errorMessage2)</MudAlert>
+        </div>
+}
+else if (Elements?.Count() is 0)
+{
+        <div style="text-align: center;">
+            <h1>Xabarnomalar mavjud emas</h1>
+
+        </div>
+}
+else
+{
+    <MudTable style="background-color:floralwhite;" Items="@Elements" Dense="@dense" Bordered="@bordered" Striped="@striped">
+      
+
+            <ColGroup>
+            <col style="width: 7%;" />
+            <col style="width: 14%;" />
+            <col style="width: 11%;" />
+            <col style="width: 11%;" />
+            <col style="width: 11%;" />
+            <col style="width: 11%;" />
+            <col style="width: 11%;" />
+            <col style="width: 22%;" />
+            <col style="width: 1%;" />
+            <col style="width: 1%;" />
+            </ColGroup>
+
+            <HeaderContent>
+                <MudTh style="text-align: center;">Pul miqdori</MudTh>
+                <MudTh style="text-align: center;">Malumot</MudTh>
+                 <MudTh style="text-align: center;">Yuboruvchini ismi</MudTh>
+                 <MudTh style="text-align: center;">Qabul qiluvchini ismi</MudTh>
+            <MudTh style="text-align: center;">Pul kimga berilishi</MudTh>
+                <MudTh style="text-align: center;">Yaratilgan sana</MudTh>
+            <MudTh style="text-align: center;">Qaytarish sanasi</MudTh>
+                <MudTh style="text-align: center;"> Holati</MudTh>
+            <MudTh style="text-align: center;"> Harakat</MudTh>
+            <MudTh style="text-align: center;"> Harakat</MudTh>
+
+            </HeaderContent>
+
+            <RowTemplate>
+            <MudTd>@context.Cost</MudTd>
+            @if(context.Description is null)
+            {
+                <MudTd> bo'sh</MudTd>
+            }
+            else
+            {
+                <MudTd> @context.Description </MudTd>
+            }
+            @if(context.DeleteSenderName is null)
+            {
+                <MudTd> @context.SenderName </MudTd>
+                <MudTd> @context.ReceiverName </MudTd>
+          
+            }
+            else
+            {
+                <MudTd> @context.DeleteSenderName </MudTd>
+                <MudTd> @(context.DeleteSenderName == context.SenderName ? context.ReceiverName : context.SenderName) </MudTd>
+            }
+            <MudTd> @context.GivenPersonName</MudTd>
+            <MudTd> @context.CreateAt </MudTd>
+            @if (context.LastAt is null)
+            {
+                <MudTd> bo'sh</MudTd>
+            }
+            else
+            {
+                <MudTd> @context.LastAt </MudTd>
+            }
+
+            @if(context.DebtType == EDebtType.Created)
+            {
+                <MudTd> Qabul qilinishi kutilmoqda ...</MudTd>
+            }
+            else if (context.DebtType == EDebtType.Accepted)
+            {
+                         <MudTd> O'chirilishi kutilmoqda ...</MudTd>
+            }
+            else
+            {
+                <MudTd> Qabul qilimadi </MudTd>
+            }
+
+
+            @if (context.DebtType == EDebtType.Created)
+            {
+                @if(context.ReceiverName.ToLower() == userName.ToLower())
+                {
+                    <MudTd>   <MudIconButton OnClick="@(async () => await Rejected(context.Id))" Icon=@Icons.Material.Rounded.Close Color="Color.Default" /> </MudTd>
+                    <MudTd>   <MudIconButton OnClick="@(async () =>  await Accepted(context.Id))" Icon=@Icons.Material.Rounded.Check Color="Color.Default" /> </MudTd>
+                }
+                else
+                {
+                    <MudTd>   <MudIconButton OnClick="@(async () =>  GoToDebt(context.Id))" Icon=@Icons.Material.Filled.Edit Color="Color.Default" /> </MudTd>
+                    <MudTd>   <MudIconButton OnClick="@(async () => await Delete(context.Id))" Icon=@Icons.Material.Filled.Delete Color="Color.Default" /> </MudTd>
+                }
+            }
+            else if (context.DebtType == EDebtType.Accepted)
+            {
+                @if (context.DeleteSenderName.ToLower() != userName.ToLower())
+                {
+                    <MudTd>   <MudIconButton OnClick="@(async () => await UpdateDebtForDelete(context.Id))" Icon=@Icons.Material.Filled.Close Color="Color.Default" /> </MudTd>
+                    <MudTd>   <MudIconButton OnClick="@(async () => await Delete(context.Id))" Icon=@Icons.Material.Filled.Check Color="Color.Default" /> </MudTd>
+                }
+                else
+                {
+                    <MudTd>   <MudIconButton OnClick="@(async () => await  GoToDebts(context.Id))" Icon=@Icons.Material.Filled.Edit Color="Color.Default" /> </MudTd>
+                    <MudTd>   <MudIconButton OnClick="@(async () => await UpdateDebtForDelete(context.Id))" Icon=@Icons.Material.Filled.Delete Color="Color.Default" /> </MudTd>
+                }
+            }
+            else
+            {
+                <MudTd>   <MudIconButton OnClick="@(async () =>  GoToDebtForSend(context.Id))" Icon=@Icons.Material.Filled.Edit Color="Color.Default" /> </MudTd>
+                <MudTd>   <MudIconButton OnClick="@(async () => await Delete(context.Id))" Icon=@Icons.Material.Filled.Delete Color="Color.Default" /> </MudTd>
+            }
+      
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager RowsPerPageString="Har bir sahifadagi qatorlar:"
+                       FirstPageLabel="Birinchi sahifa"
+                       LastPageLabel="So'nggi sahifa"
+                       ItemsPerPageLabel="Qatorlar soni: "
+                       PageLabel=" sahifa"
+                       OfLabel=" dan" />
+
+            </PagerContent>
+        </MudTable>
+
+
+}
+
+
+@code {
+    private bool dense = true;
+    private bool striped = true;
+    private bool bordered = true;
+    private string searchString1 = "";
+    private Debts selectedItem1 = null;
+    private HashSet<Debts> selectedItems = new HashSet<Debts>();
+    string userName;
+    private List<Debts>? Elements = new List<Debts>();
+    private Debts? Element = new Debts();
+    string? errorMessage;
+    string? errorMessage2;
+
+    UpdateDebtByReveiver model = new UpdateDebtByReveiver();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result2 = await accountService.GetAccountAsync();
+
+        if (result2.IsSuccess)
+        {
+            var userVM = result2.Data;
+            userName = userVM?.Name;
+        }
+        else
+        {
+            errorMessage2 = result2.ErrorMessage;
+        }
+
+        var result = await debtService.GetDebtsAsync();
+
+        if (result.IsSuccess)
+        {
+            Elements = result.Data;
+            Elements = Elements.Where(x => x.DebtType == EDebtType.Created || x.DebtType == EDebtType.Accepted && x.DeleteSenderName != null || x.DebtType == EDebtType.Rejected && x.SenderName.ToLower() == userName.ToLower()).ToList();
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+
+    }
+
+
+    private bool FilterFunc1(Debts element) => FilterFunc(element, searchString1);
+
+    private bool FilterFunc(Debts element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+
+        if (element.Description is not null)
+            if (element.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+        return false;
+    }
+
+
+    private async Task Accepted(int debtId)
+    {
+        model.IsAccepted = true;
+
+        var result = await debtService.UpdateDebtByReveiver(model, debtId);
+
+        if (result.IsSuccess)
+        {
+            NavManager.NavigateTo(NavManager.Uri, true);
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+
+    }
+
+    private async Task Rejected(int debtId)
+    {
+        model.IsAccepted = false;
+
+        var result = await debtService.UpdateDebtByReveiver(model, debtId);
+
+        if (result.IsSuccess)
+        {
+            NavManager.NavigateTo(NavManager.Uri, true);
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+    }
+
+    private async Task UpdateDebtForDelete(int debtId)
+    {
+
+        var result = await debtService.UpdateDebtForDelete(debtId);
+
+        if (result.IsSuccess)
+        {
+            NavManager.NavigateTo(NavManager.Uri, true);
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+    }
+
+
+
+    private async Task Delete(int debtId)
+    {
+         var result = await debtService.DeleteDebtAsync(debtId);
+
+        if (result.IsSuccess)
+        {
+            NavManager.NavigateTo(NavManager.Uri, true);
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+
+    }
+
+    private void GoToDebt(int debtId)
+    {
+        NavManager.NavigateTo($"/QarzniO'zgartirish/{debtId}");
+    }
+
+    private void GoToDebtForSend(int debtId)
+    {
+        NavManager.NavigateTo($"/QarzniO'zgartirishVaYuborish/{debtId}");
+    }
+
+    private async Task GoToDebts(int debtId)
+    {
+
+          var result = await debtService.UpdateDebtForDelete(debtId);
+
+        if (result.IsSuccess)
+        {
+            NavManager.NavigateTo($"/UmumiyQarzlar");
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+       
+    }
+}
+
+
+
+
+
+
+
+
+
+

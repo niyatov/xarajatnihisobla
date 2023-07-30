@@ -1,0 +1,118 @@
+﻿@page "/Kirish"
+@using FluentValidation
+@using OutlayMudBlazor.Dtoes;
+@using System.Web;
+@inject NavigationManager NavManager
+@using OutlayMudBlazor.Services;
+@inject AccountService accountService
+
+<div style="display: flex; justify-content: center;">
+    <div style="width: 433px;">
+        <MudCard style="background-color:floralwhite;">
+            <MudForm Model="@model" @ref="@form" Validation="@(signInDtoValidator.ValidateValue)" ValidationDelay="0">
+		<MudCardContent>
+
+                    @if (errorMessage is not null)
+                    {
+                        <div style="display: flex; justify-content: center;">
+                            <MudAlert Severity="MudBlazor.Severity.Error">@errorMessage</MudAlert>
+                        </div>
+                    }
+
+				<MudTextField  @bind-Value="model.UsernameOrEmail"
+                              For="@(() => model.UsernameOrEmail)"
+							  Immediate="true"
+                                  Label="Ism yoki email" />
+
+				<MudTextField @bind-Value="model.Password"
+                              For="@(() => model.Password)"
+							  Immediate="true"
+                                  InputType="InputType.Password"
+                                  Label="Parol"/>
+
+        </MudCardContent>
+	</MudForm>
+       <div style="display: flex; justify-content: center;">
+    <MudCardActions >
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" Class="ml-auto" OnClick="@(async () => await Register())">RO'YXATDAN O'TISH</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-1" OnClick="@(async () => await Sign())">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kirish&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</MudButton>
+    </MudCardActions>
+        </div>
+            <div style="display: flex; justify-content: center;">
+                <MudAlert Severity="MudBlazor.Severity.Info">Oldin ro'yxatdan o'tmagan bo'lsangiz RO'YXATDAN O'TISH ga bosing</MudAlert>
+            </div>
+
+        <br />
+</MudCard>
+</div>
+</div>
+
+
+
+
+@code {
+    string? errorMessage;
+    MudForm? form;
+    string returnUrl;
+
+    protected override void OnInitialized()
+    {
+        var uri = new Uri(NavManager.Uri);
+        returnUrl = HttpUtility.ParseQueryString(uri.Query).Get("returnUrl");
+    }
+
+    SignInDtoFluentValidator signInDtoValidator = new SignInDtoFluentValidator();
+    SignIn model = new SignIn();
+
+    private async Task Register()
+    {
+        NavManager.NavigateTo("/Ro'yxatdan_o'tish?returnUrl=" + HttpUtility.UrlEncode(returnUrl));
+    }
+
+    private async Task Sign()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            var result = await accountService.SignInAsync(model);
+
+            if (result.IsSuccess)
+            {
+                if (returnUrl is "signin")
+                    NavManager.NavigateTo($"/", true);
+                else
+                    NavManager.NavigateTo($"/{returnUrl}", true);
+                await Task.Delay(500); // yopilish jarayoni tamomlanishini kuting
+                await InvokeAsync(StateHasChanged); // sahifani yangilang
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage;
+            }
+        }
+    }
+
+    public class SignInDtoFluentValidator : AbstractValidator<SignIn>
+    {
+        public SignInDtoFluentValidator()
+        {
+
+            RuleFor(x => x.UsernameOrEmail)
+                .NotEmpty().WithMessage("Ism yoki emailni kiriting")
+                .Length(4, 64).WithMessage("Ism yoki email kamida 4 va ko'pi bilan 64 belgidan iborat bo'lishi kerak"); 
+
+            RuleFor(x => x.Password)
+                .NotEmpty().WithMessage("Parolni kiriting")
+                .Length(6, 30).WithMessage("Parol kamida 6 va ko'pi bilan 30 belgidan iborat bo'lishi kerak");
+        }
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<SignIn>.CreateWithOptions((SignIn)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+    }
+}

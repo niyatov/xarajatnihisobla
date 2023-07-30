@@ -1,0 +1,13 @@
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <div style="text-align: center;">
+                <h1>Sahifa topilmadi</h1>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>

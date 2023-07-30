@@ -1,0 +1,53 @@
+﻿@using System.Net;
+@using System.Web;
+@inject NavigationManager NavManager
+@using OutlayMudBlazor.Services;
+@inject AccountService accountService
+
+<MudNavMenu>
+    @if(isHave)
+    {
+        <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Bosh Sahifa (Sayt haqida)</MudNavLink>
+        <MudNavLink Href="XarajatQo'shish" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Xarajat Qo'shish</MudNavLink>
+        <MudNavLink Href="ShaxsiyKategoriyaYaratish" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Shaxsiy Kategoriya Yaratish</MudNavLink>
+        <MudNavLink Href="OmmaviyKategoriyaYaratish" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Ommaviy Kategoriya Yaratish</MudNavLink>
+        <MudNavLink Href="OmmaviyKategoriyagaQo'shilish" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.KeyboardTab">Ommaviy Kategoriyaga Qo'shilish</MudNavLink>
+        <MudNavLink Href="Kategoriyalar" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Kategoriyalar</MudNavLink>
+        <MudNavLink Href="QarzQo'shish" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Qarz Qo'shish</MudNavLink>
+        <MudNavLink Href="UmumiyQarzlar" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Umumiy Qarzlar</MudNavLink>
+        <MudNavLink Href="OlinadiganQarzlar" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Olinadigan Qarzlar</MudNavLink>
+        <MudNavLink Href="BeriladiganQarzlar" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Beriladigan Qarzlar</MudNavLink>
+    }
+    
+</MudNavMenu>
+
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}
+
+@code {
+    bool isHave = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+         var result = await accountService.GetAccountAsync();
+
+        if (result.IsSuccess)
+        {
+             isHave = true;
+        }
+        else if(result.IsNotFound)
+        {
+            var returnUrl = NavManager.ToBaseRelativePath(NavManager.Uri);
+            NavManager.NavigateTo("/kirish?returnUrl=" + HttpUtility.UrlEncode(returnUrl));
+        }
+    }
+}
