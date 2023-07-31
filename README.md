@@ -1,11 +1,25 @@
 # Foydalanilgan narsalar
 
 aspnetcore, 
- blazor,
+blazor,
+efcore
 sqlserver,
-efcore,
-mapster,
+asp.net identity,
+xunit,
 fluentvalidation,
 serilog,
-microsoft.identity,
-xunit,
+mapster,
+memorycache,
+corspolicy,
+custom exception classes,
+custom action filters,
+custom middleware,
+options pattern,
+repository pattern,
+unit of work pattern
+
+
+
+
+
+
