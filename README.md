@@ -1,1 +1,5 @@
-# xarajatnihisobla
+# Foydalanilgan narsalar
+
+aspnetcore
+blazor
+sqlserver
