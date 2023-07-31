@@ -1,7 +1,7 @@
 # Foydalanilgan narsalar
 
 aspnetcore, 
-blazor,
+ blazor,
 sqlserver,
 efcore,
 mapster,
