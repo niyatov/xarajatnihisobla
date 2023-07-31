@@ -2,4 +2,10 @@
 
 aspnetcore, 
 blazor,
-sqlserver
+sqlserver,
+efcore,
+mapster,
+fluentvalidation,
+serilog,
+microsoft.identity,
+xunit,
