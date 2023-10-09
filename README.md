@@ -1,4 +1,4 @@
-https://xarajatnihisobla-001-site1.atempurl.com
+https://chiqimlarhisobi-001-site1.dtempurl.com
 # Foydalanilgan narsalar
 
 aspnetcore, 
